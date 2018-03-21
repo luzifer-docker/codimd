@@ -53,8 +53,8 @@ RUN set -ex \
 WORKDIR /hackmd
 
 RUN set -ex \
- && npm install \
  && npm install webpack \
+ && npm install \
  && npm run build
 
 ADD run.sh /usr/local/bin/run.sh
