@@ -1,6 +1,33 @@
-FROM node:7
+FROM node:7-alpine as builder
 
-ENV VERSION                    master
+ARG CODIMD_VERSION=1.2.1
+ARG BUILD_ASSETS=false
+
+RUN set -ex \
+ && apk add --no-cache \
+      bash \
+      build-base \
+      curl \
+      git \
+      make \
+      python \
+      tar \
+ && mkdir /hackmd \
+ && curl -sSfL https://github.com/hackmdio/codimd/archive/${CODIMD_VERSION}.tar.gz | tar -xzf - --strip-components=1 -C /hackmd \
+ && cd /hackmd \
+ && npm install --loglevel warn \
+      grunt \
+      webpack \
+      webpack-cli \
+ && npm install --loglevel warn \
+ && npm run build \
+ && rm -rf node_modules \
+ && NODE_ENV=production npm install --loglevel warn
+
+
+FROM node:7-alpine
+
+LABEL codimd_version=1.2.1
 
 # ENV DEBUG                      true
 # ENV HMD_DOMAIN                 localhost
@@ -47,17 +74,11 @@ ENV VERSION                    master
 # ENV HMD_S3_BUCKET              ""
 
 RUN set -ex \
- && mkdir /hackmd \
- && curl -sSfL https://github.com/hackmdio/hackmd/archive/${VERSION}.tar.gz | tar -xzf - --strip-components=1 -C /hackmd
+ && apk add --no-cache bash
 
-WORKDIR /hackmd
+COPY --from=builder /hackmd /hackmd
 
-RUN set -ex \
- && npm install webpack \
- && npm install \
- && npm run build
-
-ADD run.sh /usr/local/bin/run.sh
+ADD run.sh      /usr/local/bin/run.sh
 ADD config.json /hackmd/config.json.default
 ADD sequelizerc /hackmd/.sequelizerc.default
 
