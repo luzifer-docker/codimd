@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-cd /hackmd
+cd /codimd
 
 if ! [ -f /config/config.json ]; then
 	cp config.json.default config.json

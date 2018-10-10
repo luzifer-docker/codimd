@@ -12,9 +12,9 @@ RUN set -ex \
       make \
       python \
       tar \
- && mkdir /hackmd \
- && curl -sSfL https://github.com/hackmdio/codimd/archive/${CODIMD_VERSION}.tar.gz | tar -xzf - --strip-components=1 -C /hackmd \
- && cd /hackmd \
+ && mkdir /codimd \
+ && curl -sSfL https://github.com/hackmdio/codimd/archive/${CODIMD_VERSION}.tar.gz | tar -xzf - --strip-components=1 -C /codimd \
+ && cd /codimd \
  && npm install --loglevel warn \
       grunt \
       webpack \
@@ -76,16 +76,16 @@ LABEL codimd_version=1.2.1
 RUN set -ex \
  && apk add --no-cache bash
 
-COPY --from=builder /hackmd /hackmd
+COPY --from=builder /codimd /codimd
 
 ADD run.sh      /usr/local/bin/run.sh
-ADD config.json /hackmd/config.json.default
-ADD sequelizerc /hackmd/.sequelizerc.default
+ADD config.json /codimd/config.json.default
+ADD sequelizerc /codimd/.sequelizerc.default
 
 EXPOSE 3000
 VOLUME /config
 VOLUME /data
-VOLUME /hackmd/public/uploads
+VOLUME /codimd/public/uploads
 
 ENV NODE_ENV production
 
