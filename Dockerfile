@@ -1,6 +1,6 @@
-FROM node:7-alpine as builder
+FROM node:10-alpine as builder
 
-ARG CODIMD_VERSION=1.2.1
+ARG CODIMD_VERSION=1.4.0
 ARG BUILD_ASSETS=false
 
 RUN set -ex \
@@ -13,19 +13,20 @@ RUN set -ex \
       python \
       tar \
  && mkdir /codimd \
- && curl -sSfL https://github.com/hackmdio/codimd/archive/${CODIMD_VERSION}.tar.gz | tar -xzf - --strip-components=1 -C /codimd \
+ && curl -sSfL https://github.com/codimd/server/archive/${CODIMD_VERSION}.tar.gz | tar -xzf - --strip-components=1 -C /codimd \
  && cd /codimd \
- && npm install --loglevel warn \
+ && npx npm@lts install --loglevel warn \
       grunt \
       webpack \
       webpack-cli \
- && npm install --loglevel warn \
- && npm run build \
+ && npx npm@lts install --loglevel warn \
+ && npx npm@lts run build \
  && rm -rf node_modules \
- && NODE_ENV=production npm install --loglevel warn
+ && NODE_ENV=production npx npm@lts install --loglevel warn \
+ && npx npm@lts install sqlite3
 
 
-FROM node:7-alpine
+FROM node:10-alpine
 
 LABEL codimd_version=1.2.1
 
@@ -74,7 +75,9 @@ LABEL codimd_version=1.2.1
 # ENV HMD_S3_BUCKET              ""
 
 RUN set -ex \
- && apk add --no-cache bash
+ && apk add --no-cache \
+      bash \
+      sqlite
 
 COPY --from=builder /codimd /codimd
 
