@@ -21,7 +21,7 @@ RUN set -ex \
       webpack-cli \
  && npx npm@lts install --loglevel warn \
  && npx npm@lts run build \
- && rm -rf node_modules \
+ && rm -rf node_modules || true \
  && NODE_ENV=production npx npm@lts install --loglevel warn \
  && npx npm@lts install sqlite3
 
